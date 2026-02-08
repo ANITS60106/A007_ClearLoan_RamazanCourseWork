@@ -7,19 +7,31 @@ Link to chat with supervisor: https://drive.google.com/file/d/1_ONQI1hsWcM1KQTlG
 
 
 Week_003
+Project description:
+
 My final idea is not just a loan aggregator like Banki.ru or Nova Bank, but a personal financial navigator that helps people not only choose a product, but also understand what is realistically available to them and what financial path is safe.
+ClearLoan is a fintech application designed as a financial navigator for Kyrgyzstan, created to help people find loan options that are not only available, but also realistically achievable for their personal situation. Unlike traditional loan marketplaces that simply display interest rates and product catalogs, ClearLoan focuses on guiding users toward the safest and most accessible financial decisions.
+I chose to develop ClearLoan because financial accessibility remains a significant issue in Kyrgyzstan, especially outside major cities. Today, in order to obtain a loan, individuals often need to visit multiple banks, submit repeated documents, and wait several days just to understand whether approval is possible. This process leads to wasted time, frustration, and a high number of rejections, particularly for young people, rural residents, and those without a strong credit history.
+The main purpose of ClearLoan is to shift the logic from “Where is the cheapest loan?” to “What financial product can I realistically receive right now, and why?” The platform connects banks and microfinance institutions, but works not as a simple showcase, but as an intelligent filter. After completing a short application, the user receives a personalized overview of offers: which loans are likely to be approved, where rejection is possible, and what steps can improve approval chances in the future.
+If a loan is not currently accessible, ClearLoan proposes alternative solutions such as smaller amounts, installment plans, microfinance options, or a preparation roadmap. This transforms rejection into a clear next step rather than a dead end, helping users make more responsible financial decisions.
+A key advantage of this concept is reducing unnecessary applications and lowering refusal rates. Financial institutions benefit by receiving more qualified and prepared clients, which decreases the workload on branch offices and call centers while improving conversion efficiency. Users benefit by saving time and gaining transparent understanding of their real financial opportunities.
+ClearLoan is especially valuable for Kyrgyzstan because it considers local conditions, including weak internet connectivity in many regions. The platform can provide basic offline access through SMS or USSD to check application status and receive offers. Additionally, presenting information in a simple and understandable way, including support for the Kyrgyz language, increases trust and improves financial literacy among users with limited financial background.
+Overall, I selected this project because ClearLoan addresses multiple important goals: improving financial inclusion, reducing ineffective loan applications, supporting safer borrowing decisions, and creating a scalable fintech infrastructure that can strengthen the financial ecosystem of Kyrgyzstan.
 
-In existing solutions, users see a list of banks and interest rates, but they do not understand where they are actually likely to get approved. As a result, they submit multiple applications, receive rejections, waste time, and damage their credit history. I change the entire logic: first, the system evaluates the user’s situation, and only then offers suitable financial solutions. In this way, the platform answers not the question “where is it cheaper,” but “what can I get right now and why.”
+Competitors:
 
-The platform brings together banks and microfinance organizations, but it works not as a showcase, but as a filter. The user fills out a short questionnaire and then receives a personalized picture: which products fit them with a high probability, where rejection is possible, and what steps they should take to improve their chances in the future. If a loan is not доступible at the moment, the system suggests alternatives — installment plans, a smaller amount, microfinancing, or a preparation plan for future credit. This way, even a rejection becomes not a dead end, but a clear next step.
+Several similar platforms already exist internationally, showing that the idea of digital loan marketplaces is востребована, but ClearLoan introduces important improvements adapted specifically for Kyrgyzstan.
+One example is LendingTree (USA), one of the largest online loan comparison platforms. It allows users to compare offers from banks and lenders, but it mainly focuses on interest rates rather than approval probability or financial guidance.
+Another well-known product is NerdWallet (USA), which provides comparisons of financial products such as loans, credit cards, and insurance. However, it works mostly as an informational catalog and does not offer personalized approval forecasting.
+In Europe, Revolut has expanded beyond digital banking into personal finance services, offering loans and credit products directly through the app. Still, it operates mainly within highly developed financial systems and does not target regions with limited banking access.
+A similar Russian example is Sravni.ru, which functions as a marketplace for loans, insurance, and banking services. Like Banki.ru, it helps users compare products but does not strongly focus on reducing rejection rates through pre-scoring.
+Another relevant case is Credit Karma (USA/UK), which provides users with credit score monitoring and personalized financial recommendations. While it includes some approval-oriented suggestions, it depends heavily on established credit bureau systems that are not fully developed in Kyrgyzstan.
+These examples demonstrate that financial marketplaces are common globally, but ClearLoan differentiates itself by combining loan aggregation with approval probability assessment, alternative pathways for users, and offline accessibility features tailored to the specific conditions of Kyrgyzstan.
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/041fb972-d057-4f20-b670-683614f2b38e" />
 
-The key difference from existing services is the preliminary approval probability assessment and the reduction of unnecessary rejections. Banks and MFIs receive not random applications, but already “prepared” clients, which reduces the workload on call centers and increases conversion rates. Users, in turn, save time and gain transparent understanding of their financial possibilities.
 
-A special focus is placed on the conditions of Kyrgyzstan. The platform takes into account weak internet access in rural regions and provides basic offline access through SMS or USSD for checking application status and receiving offers. All information is presented in simple language, including support for the Kyrgyz language, with clear explanations of real overpayment and risks, so that the product is understandable even for people without a financial background.
-
-Thus, the project solves several problems at once: it improves financial accessibility, reduces the number of unjustified rejections, helps people make more informed decisions, and creates value for banks through higher-quality leads. This makes the product not a copy of existing aggregators, but an infrastructure-level fintech solution that can scale within the country and to other markets with similar challenges.
-Competitors: Mkopo Rahisi (InVenture) (Kenya)
-Credit Karma (USA)
-Upstart (USA)
-Borrowell (Canada)
-LendingTree (USA)
+What's been accomplished in the third week:
+- The app framework was created
+- Prospects were discussed with the Elkart MPC
+- The app widgets are working properly
+- A developer account was purchased
