@@ -53,3 +53,40 @@ Progress of week 004:
 - Simple registration upon login (where they ask for a phone number, password, and passport information (only during registration, not upon login))
 - Footer: The first section will contain an aggregator, the second a "basket" of current loans, the third section where you enter the loan terms and the one you want, and the fourth section a profile where you can see your details, including your current employment status.
 - At least some design and UI have been added, and in a red-green color scheme. Also, add a switcher where you can change the language (either Russian or Kyrgyz).
+
+Progress of week 005:
+Slightly improved the overall UI. The color scheme was adjusted toward a brighter green-white fintech style, replacing the previous darker tone. Basic spacing, typography, and card components were cleaned up to make the interface look more structured, though the design is still relatively simple and not fully polished.
+
+Added a loan type selector in the “Request” section. Users can now choose between several basic options (for example: mortgage, consumer loan, etc.). The logic behind recommendations remains prototype-level and does not yet reflect real scoring or approval systems.
+
+Moved the language switcher to the main authentication screens (Login / Registration). Users can now toggle between Russian and Kyrgyz. Translation coverage is partial and mostly affects UI labels rather than full localization.
+
+Extended the registration form. In addition to phone number, password, and passport details, users now must specify:
+
+Occupation (what they work as)
+
+Monthly income
+These fields are currently stored but not yet deeply used in scoring logic.
+
+Created a basic Django backend with a simple SQLite database. It supports:
+
+User registration
+
+User login
+
+Basic storage of profile data
+
+Simple loan offer endpoints
+The backend is minimal and does not yet include advanced validation, encryption layers beyond Django defaults, or real banking integrations.
+
+Implemented a simple bottom navigation footer with four sections:
+
+Aggregator (loan offers list)
+
+Loans (active loans overview)
+
+Request (loan conditions form)
+
+Profile (user information and logout)
+
+Added light animations (page transitions and minor UI effects). These are basic Flutter animations and do not yet represent a fully production-ready motion system.
