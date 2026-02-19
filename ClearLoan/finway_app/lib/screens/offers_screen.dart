@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/scoring_service.dart';
+import '../services/scoring_services.dart';
 import '../widgets/bank_offer_card.dart';
 import '../models/credit_application.dart';
 

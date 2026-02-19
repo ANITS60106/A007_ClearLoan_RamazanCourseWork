@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../services/i18n.dart';
 import '../services/loans_service.dart';
+import '../widgets/app_card.dart';
 
 class LoansScreen extends StatelessWidget {
   const LoansScreen({super.key});
@@ -9,7 +11,7 @@ class LoansScreen extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Loans')),
+      appBar: AppBar(title: Text(I18n.t('loans'))),
       body: SafeArea(
         child: ValueListenableBuilder(
           valueListenable: LoansService.loans,
@@ -18,27 +20,42 @@ class LoansScreen extends StatelessWidget {
               return Center(
                 child: Text(
                   'No active loans yet',
-                  style: TextStyle(color: Colors.white.withOpacity(0.75)),
+                  style: TextStyle(color: Colors.black.withOpacity(0.55)),
                 ),
               );
             }
 
             return ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 8),
               itemCount: loans.length,
               itemBuilder: (context, i) {
                 final l = loans[i];
-                return Card(
-                  child: ListTile(
-                    title: Text(l.bankName, style: const TextStyle(fontWeight: FontWeight.w700)),
-                    subtitle: Text(
-                      '${l.amount} som • ${l.months} months • ${l.rate.toStringAsFixed(0)}%\nMonthly: ${l.monthlyPayment} som',
-                      style: TextStyle(color: Colors.white.withOpacity(0.7)),
-                    ),
-                    isThreeLine: true,
-                    trailing: IconButton(
-                      onPressed: () => LoansService.removeAt(i),
-                      icon: Icon(Icons.delete_outline, color: cs.secondary),
-                    ),
+                return AppCard(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(l.bankName, style: const TextStyle(fontWeight: FontWeight.w900)),
+                            const SizedBox(height: 6),
+                            Text(
+                              '${l.amount} сом • ${l.months} мес. • ${l.rate.toStringAsFixed(0)}%',
+                              style: TextStyle(color: Colors.black.withOpacity(0.6), fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Monthly: ${l.monthlyPayment} сом',
+                              style: TextStyle(color: cs.primary, fontWeight: FontWeight.w900),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => LoansService.removeAt(i),
+                        icon: Icon(Icons.delete_outline, color: cs.error),
+                      ),
+                    ],
                   ),
                 );
               },

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/mock_offers.dart';
 import '../models/bank_offer.dart';
+import '../services/i18n.dart';
 import '../widgets/bank_offer_card.dart';
 
 class AggregatorScreen extends StatefulWidget {
@@ -36,7 +37,6 @@ class _AggregatorScreenState extends State<AggregatorScreen> {
       list = list.where((o) => o.status != OfferStatus.rejected && o.months >= 36).toList();
     }
 
-    // show approved first, then alternative, then rejected
     list.sort((a, b) => a.status.index.compareTo(b.status.index));
     return list;
   }
@@ -47,9 +47,7 @@ class _AggregatorScreenState extends State<AggregatorScreen> {
     final offers = _applyFilters();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Aggregator'),
-      ),
+      appBar: AppBar(title: Text(I18n.t('aggregator'))),
       body: SafeArea(
         child: Column(
           children: [
@@ -59,9 +57,8 @@ class _AggregatorScreenState extends State<AggregatorScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Most likely to approve',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-                    textAlign: TextAlign.left,
+                    'Best matches for you',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: 10),
                   TextField(
@@ -90,9 +87,9 @@ class _AggregatorScreenState extends State<AggregatorScreen> {
                         const SizedBox(width: 8),
                         _chip('Low %', 1, cs),
                         const SizedBox(width: 8),
-                        _chip('Short term', 2, cs),
+                        _chip('Short', 2, cs),
                         const SizedBox(width: 8),
-                        _chip('Long term', 3, cs),
+                        _chip('Long', 3, cs),
                       ],
                     ),
                   ),
@@ -117,9 +114,13 @@ class _AggregatorScreenState extends State<AggregatorScreen> {
       label: Text(text),
       selected: selected,
       onSelected: (_) => setState(() => _filter = value),
-      selectedColor: cs.primary.withOpacity(0.2),
-      labelStyle: TextStyle(color: selected ? Colors.white : Colors.white70),
-      side: BorderSide(color: selected ? cs.primary.withOpacity(0.35) : Colors.white12),
+      selectedColor: cs.primary.withOpacity(0.16),
+      backgroundColor: cs.surface,
+      labelStyle: TextStyle(
+        color: selected ? cs.primary : Colors.black.withOpacity(0.75),
+        fontWeight: FontWeight.w700,
+      ),
+      side: BorderSide(color: Colors.black.withOpacity(0.08)),
     );
   }
 }
