@@ -1,17 +1,18 @@
 FROM python:3.11-slim
 
+WORKDIR /app
+
+# 1) копируем requirements из правильного пути (от корня репо)
+COPY ClearLoan/backend/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+# 2) копируем весь backend (правильный путь от корня репо)
+COPY ClearLoan/backend/ /app/
+
+# 3) запуск
+RUN chmod +x /app/start.sh
+
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-WORKDIR /app
-
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . /app/
-
-# Koyeb (and most platforms) provide PORT env var
-EXPOSE 8000
-
-# Run migrations/collectstatic, then start gunicorn
-CMD ["sh", "/app/start.sh"]
+CMD ["/app/start.sh"]
