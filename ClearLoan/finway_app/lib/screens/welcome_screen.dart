@@ -78,10 +78,13 @@ class _HeroCard extends StatelessWidget {
                 width: 46,
                 height: 46,
                 decoration: BoxDecoration(
-                  color: cs.primary,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(Icons.stacked_line_chart, color: Colors.white),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: Image.asset('assets/images/clearloan_logo.png', fit: BoxFit.cover),
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(

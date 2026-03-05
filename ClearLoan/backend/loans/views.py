@@ -3,6 +3,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import TokenAuthentication
 from django.db.models import Q
+from django.core.mail import send_mail
+from django.conf import settings
+from typing import Optional
 
 from .models import (
     LoanOffer,
@@ -141,6 +144,40 @@ def _compute_score(user) -> int:
     return max(300, min(850, base))
 
 
+def _history_block_reason(user) -> Optional[str]:
+    """Return a reason string if user should be blocked from submitting applications.
+
+    Rules requested for the prototype demo:
+      - If user has >= 1 red event (default / unpaid 3+ months) -> block
+      - If user has > 3 yellow events (late payments) -> block
+    """
+    history = CreditHistoryEntry.objects.filter(user=user)
+    if not history.exists():
+        return None
+
+    red = history.filter(status='default').count()
+    if red >= 1:
+        return 'Blocked: red-zone credit history (unpaid 3+ months).'
+
+    # "Yellow" is represented as late payments. We count total late occurrences.
+    yellow = 0
+    for e in history:
+        if e.status == 'late':
+            yellow += max(int(e.late_payments or 0), 1)
+    if yellow > 3:
+        return 'Blocked: too many yellow-zone late payments (> 3).'
+
+    return None
+
+
+def _max_amount_for_user(user) -> int:
+    # Individual clients should not request unrealistic amounts.
+    # Legal entities can request significantly more.
+    if getattr(user, 'user_type', 'individual') == 'legal':
+        return 500_000_000
+    return 5_000_000
+
+
 def _estimate_payment(amount: int, months: int, annual_rate: float) -> int:
     if amount <= 0 or months <= 0:
         return 0
@@ -195,6 +232,18 @@ class ScoredBankOptionsView(APIView):
         amount = int(request.query_params.get('amount', '0') or 0)
         months = int(request.query_params.get('months', '0') or 0)
 
+        # If user is blocked, still return options but mark as rejected to guide UI.
+        block_reason = _history_block_reason(request.user)
+
+        # Enforce user-type limit
+        max_allowed = _max_amount_for_user(request.user)
+        if amount > max_allowed:
+            return Response({
+                'score': _compute_score(request.user),
+                'options': [],
+                'detail': f'Requested amount exceeds the limit for this user type (max {max_allowed}).'
+            }, status=400)
+
         score = _compute_score(request.user)
         income = max(int(getattr(request.user, 'monthly_income', 0) or 0), 1)
         monthly_existing = sum(int(a.monthly_payment or 0) for a in ActiveLoan.objects.filter(user=request.user, status='active'))
@@ -212,7 +261,10 @@ class ScoredBankOptionsView(APIView):
             dti = (monthly_existing + est_payment) / income
             prob = _approval_probability(score, dti, rate)
 
-            if prob >= 0.70:
+            if block_reason:
+                status_lbl = 'rejected'
+                prob = 0.0
+            elif prob >= 0.70:
                 status_lbl = 'approved'
             elif prob >= 0.40:
                 status_lbl = 'alternative'
@@ -237,7 +289,10 @@ class ScoredBankOptionsView(APIView):
             })
 
         options.sort(key=lambda x: x['approval_probability'], reverse=True)
-        return Response({'score': score, 'options': options})
+        resp = {'score': score, 'options': options}
+        if block_reason:
+            resp['detail'] = block_reason
+        return Response(resp)
 
 
 class ApplyForLoanView(APIView):
@@ -248,6 +303,15 @@ class ApplyForLoanView(APIView):
         product_id = int(request.data.get('product_id'))
         amount = int(request.data.get('amount'))
         months = int(request.data.get('months'))
+
+        # Hard filters to avoid sending "trash" applications to bank staff
+        block_reason = _history_block_reason(request.user)
+        if block_reason:
+            return Response({'detail': block_reason}, status=422)
+
+        max_allowed = _max_amount_for_user(request.user)
+        if amount > max_allowed:
+            return Response({'detail': f'Requested amount exceeds the limit for this user type (max {max_allowed}).'}, status=400)
 
         product = LoanProduct.objects.select_related('bank').get(id=product_id)
 
@@ -289,6 +353,26 @@ class ApplyForLoanView(APIView):
                 status='active',
             )
 
+        # Send a prototype email notification to bank employees.
+        # For this student demo we always send a copy to the test address.
+        try:
+            bank_email = (product.bank.notification_email or '').strip()
+            recipients = [e for e in [bank_email, getattr(settings, 'DEMO_APPLICATIONS_EMAIL', '')] if e]
+            if recipients:
+                subject = f"ClearLoan application: {product.bank.name_en} / {product.title_en}"
+                body = (
+                    f"New loan application (prototype)\n\n"
+                    f"Client: {getattr(request.user, 'full_name', '')} ({request.user.phone})\n"
+                    f"User type: {getattr(request.user, 'user_type', 'individual')}\n"
+                    f"Requested: {amount} KGS for {months} months\n"
+                    f"Estimated monthly payment: {est_payment} KGS\n"
+                    f"Decision: {status_lbl} (p={prob:.2f})\n\n"
+                    f"This is a demo email sent by ClearLoan prototype."
+                )
+                send_mail(subject, body, getattr(settings, 'DEFAULT_FROM_EMAIL', 'no-reply@clearloan.local'), recipients, fail_silently=True)
+        except Exception:
+            pass
+
         return Response(LoanApplicationSerializer(app).data)
 
 
@@ -298,6 +382,33 @@ class LoanApplicationsView(generics.ListAPIView):
 
     def get_queryset(self):
         return LoanApplication.objects.filter(user=self.request.user)
+
+
+class BankInboxApplicationsView(generics.ListAPIView):
+    """Inbox for bank employees (admin/staff).
+
+    Shows applications submitted to the employee's bank.
+    """
+
+    serializer_class = LoanApplicationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        u = self.request.user
+        if getattr(u, 'role', 'client') not in ['bank_admin', 'bank_staff']:
+            return LoanApplication.objects.none()
+        bank = getattr(u, 'bank', None)
+        if not bank:
+            return LoanApplication.objects.none()
+
+        qs = LoanApplication.objects.select_related('product', 'product__bank', 'user').filter(product__bank=bank)
+
+        status = (self.request.query_params.get('status') or '').strip()
+        if status:
+            qs = qs.filter(decision_status=status)
+
+        # Prioritize clean/empty credit history and higher approval probability
+        return qs.order_by('-approval_probability', '-created_at')
 
 
 class ActiveLoansView(generics.ListCreateAPIView):

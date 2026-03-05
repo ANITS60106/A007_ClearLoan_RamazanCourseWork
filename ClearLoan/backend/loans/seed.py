@@ -3,7 +3,7 @@ import random
 
 from django.contrib.auth import get_user_model
 
-from .models import Bank, BankBranch, LoanProduct, CreditHistoryEntry
+from .models import Bank, BankBranch, LoanProduct, CreditHistoryEntry, ActiveLoan
 
 
 def seed_banks_and_products():
@@ -353,6 +353,8 @@ def seed_banks_and_products():
     ]
 
     for b in banks:
+        domain = f"{b['code']}.kg"
+        notify_email = f"credit.applications@{domain}"
         bank, _ = Bank.objects.get_or_create(
             code=b["code"],
             defaults=dict(
@@ -367,6 +369,8 @@ def seed_banks_and_products():
                 about_en=b["about"]["en"],
                 about_ru=b["about"]["ru"],
                 about_ky=b["about"]["ky"],
+                email_domain=domain,
+                notification_email=notify_email,
             ),
         )
         # update if exists (simple)
@@ -382,6 +386,8 @@ def seed_banks_and_products():
             about_en=b["about"]["en"],
             about_ru=b["about"]["ru"],
             about_ky=b["about"]["ky"],
+            email_domain=domain,
+            notification_email=notify_email,
         )
 
         # branches
@@ -447,13 +453,16 @@ def seed_fake_users_with_histories(count: int = 25):
         "Student",
         "Teacher",
         "Driver",
-        "Developer",
-        "Sales manager",
+        "Software Developer",
+        "Sales Manager",
         "Doctor",
         "Accountant",
         "Self-employed",
         "Farmer",
-        "Office worker",
+        "Office Worker",
+        "Courier",
+        "Nurse",
+        "Construction Worker",
     ]
 
     # Create users with different credit histories
@@ -465,7 +474,7 @@ def seed_fake_users_with_histories(count: int = 25):
         full_name = f"{ln} {fn}"
         passport_id = f"AN{random.randint(1000000,9999999)}"
         occupation = random.choice(occupations)
-        income = random.choice([25000, 35000, 45000, 60000, 80000, 120000])
+        income = random.choice([18000, 25000, 32000, 45000, 60000, 80000, 120000, 180000])
         user_type = "individual"
 
         user, created = User.objects.get_or_create(
@@ -483,16 +492,43 @@ def seed_fake_users_with_histories(count: int = 25):
             user.set_password(password)
             user.save()
 
-        # Clear and regenerate history for idempotence-ish
+        # Clear and regenerate demo financial data for idempotence-ish
         CreditHistoryEntry.objects.filter(user=user).delete()
+        ActiveLoan.objects.filter(user=user).delete()
 
-        mode = random.choice(["clean", "late", "mixed", "none", "default"])
+        # More deterministic distribution so demo includes all scenarios:
+        #  - first 7: clean
+        #  - next 6: late (yellow)
+        #  - next 6: mixed
+        #  - next 3: default (red)
+        #  - remaining: none
+        if i < 7:
+            mode = "clean"
+        elif i < 13:
+            mode = "late"
+        elif i < 19:
+            mode = "mixed"
+        elif i < 22:
+            mode = "default"
+        else:
+            mode = "none"
         providers = ["Aiyl Bank", "Optima Bank", "KICB", "Bakai Bank", "Kompanion Bank", "Bai-Tushum Bank", "Eldik Bank"]
 
         if mode == "none":
+            # Some users with no history but may have an active loan in the app basket
+            if random.random() < 0.4:
+                ActiveLoan.objects.create(
+                    user=user,
+                    provider_name=random.choice(providers),
+                    amount=random.choice([30000, 60000, 120000]),
+                    months=random.choice([6, 12, 18]),
+                    rate=random.choice([18.0, 22.0, 26.0]),
+                    monthly_payment=random.choice([6000, 9000, 12000]),
+                    status='active',
+                )
             continue
 
-        entries_n = random.randint(1, 4) if mode != "default" else random.randint(1, 2)
+        entries_n = random.randint(2, 5) if mode != "default" else random.randint(1, 2)
         for _ in range(entries_n):
             provider = random.choice(providers)
             original_amount = random.choice([50000, 100000, 200000, 300000, 500000])
@@ -507,15 +543,17 @@ def seed_fake_users_with_histories(count: int = 25):
                 late_payments = 0
             elif mode == "late":
                 status = "late"
-                late_payments = random.randint(1, 6)
-                note = "Had minor delays."
+                # Yellow zone: multiple small delays
+                late_payments = random.randint(1, 5)
+                note = "Had payment delays (yellow zone)."
             elif mode == "mixed":
                 status = random.choice(["ontime", "late"])
                 late_payments = 0 if status == "ontime" else random.randint(1, 4)
             elif mode == "default":
                 status = "default"
-                late_payments = random.randint(6, 12)
-                note = "Serious delinquency."
+                # Red zone: serious delinquency (3+ months unpaid)
+                late_payments = random.randint(8, 14)
+                note = "Unpaid for 3+ months (red zone)."
 
             if status in ["ontime", "late"] and random.random() < 0.5:
                 closed = opened + timedelta(days=random.randint(120, 720))
@@ -530,3 +568,70 @@ def seed_fake_users_with_histories(count: int = 25):
                 late_payments=late_payments,
                 note=note,
             )
+
+
+def seed_bank_admins_and_staff():
+    """Create prototype bank admin + staff accounts for demo."""
+    User = get_user_model()
+    banks = list(Bank.objects.all().order_by('code'))
+    base_phone = 200000
+
+    for idx, bank in enumerate(banks):
+        # Admin
+        admin_phone = f"+996555{base_phone + idx:06d}"
+        admin_email = f"admin@{bank.email_domain or (bank.code + '.kg')}"
+        admin, created = User.objects.get_or_create(
+            phone=admin_phone,
+            defaults=dict(
+                full_name=f"{bank.name_ru} Admin",
+                workplace=bank.name_en,
+                occupation='Bank administrator',
+                monthly_income=200000,
+                user_type='legal',
+                role='bank_admin',
+                bank=bank,
+                email=admin_email,
+                is_staff=True,
+            ),
+        )
+        if created:
+            admin.set_password('demo12345')
+            admin.save()
+
+        # Staff (credit specialist)
+        staff_phone = f"+996556{base_phone + idx:06d}"
+        staff_email = f"credit.specialist@{bank.email_domain or (bank.code + '.kg')}"
+        staff, created = User.objects.get_or_create(
+            phone=staff_phone,
+            defaults=dict(
+                full_name=f"{bank.name_ru} Specialist",
+                workplace=bank.name_en,
+                occupation='Credit specialist',
+                monthly_income=150000,
+                user_type='legal',
+                role='bank_staff',
+                bank=bank,
+                email=staff_email,
+                is_staff=True,
+            ),
+        )
+        if created:
+            staff.set_password('demo12345')
+            staff.save()
+
+        # Add a couple of active loans for realism (some users already pay monthly)
+        if random.random() < 0.55 and mode in ["clean", "late", "mixed"]:
+            active_n = 1 if random.random() < 0.75 else 2
+            for _ in range(active_n):
+                amt = random.choice([40000, 80000, 150000, 250000, 400000])
+                m = random.choice([6, 12, 18, 24, 36])
+                r = random.choice([18.0, 22.0, 26.0, 30.0])
+                ActiveLoan.objects.create(
+                    user=user,
+                    provider_name=random.choice(providers),
+                    amount=amt,
+                    months=m,
+                    rate=r,
+                    monthly_payment=int((amt * (1 + r / 100)) / m),
+                    status='active' if random.random() < 0.85 else 'completed',
+                )

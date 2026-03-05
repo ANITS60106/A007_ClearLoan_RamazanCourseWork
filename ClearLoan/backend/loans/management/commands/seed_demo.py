@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from loans.seed import seed_banks_and_products, seed_fake_users_with_histories
+from loans.seed import seed_banks_and_products, seed_fake_users_with_histories, seed_bank_admins_and_staff
 
 
 class Command(BaseCommand):
@@ -12,4 +12,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         seed_banks_and_products()
         seed_fake_users_with_histories(count=int(options["users"]))
+        seed_bank_admins_and_staff()
         self.stdout.write(self.style.SUCCESS("Demo data seeded successfully."))

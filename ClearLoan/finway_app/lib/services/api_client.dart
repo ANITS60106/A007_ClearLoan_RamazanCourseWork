@@ -1,11 +1,12 @@
+import 'package:finway_app/config/app_config.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 /// Very small API client for the Django backend (prototype).
 class ApiClient {
-  // If you run Android emulator: http://10.0.2.2:8080
-  // If you run on Chrome locally: http://127.0.0.1:8080
-  static String baseUrl = 'http://127.0.0.1:8080';
+  // If you run Android emulator: http://10.0.2.2:8000
+  // If you run on Chrome locally: http://127.0.0.1:8000
+  static String baseUrl = AppConfig.apiBaseUrl;
 
   static String? _token;
 

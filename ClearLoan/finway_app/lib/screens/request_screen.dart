@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/i18n.dart';
+import '../services/app_settings.dart';
 import '../widgets/app_card.dart';
 import 'bank_options_screen.dart';
 
@@ -24,6 +25,10 @@ class _RequestScreenState extends State<RequestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final maxAmount = AppSettings.userType.value == 'legal' ? 500000000.0 : 5000000.0;
+    if (_amount > maxAmount) {
+      _amount = maxAmount;
+    }
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.all(16),
@@ -52,7 +57,7 @@ class _RequestScreenState extends State<RequestScreen> {
                 Slider(
                   value: _amount,
                   min: 10000,
-                  max: 5000000,
+                  max: maxAmount,
                   divisions: 100,
                   label: _amount.toInt().toString(),
                   onChanged: (v) => setState(() => _amount = v),

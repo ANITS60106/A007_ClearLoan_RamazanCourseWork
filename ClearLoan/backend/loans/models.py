@@ -79,6 +79,11 @@ class Bank(models.Model):
     about_ru = models.TextField(blank=True)
     about_ky = models.TextField(blank=True)
 
+    # Notifications (prototype): where to send new loan applications for this bank.
+    # In real life it would be a group mailbox / CRM integration.
+    email_domain = models.CharField(max_length=120, blank=True, default='')
+    notification_email = models.EmailField(blank=True, default='')
+
     def __str__(self):
         return self.name_en
 

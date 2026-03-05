@@ -41,6 +41,19 @@ class User(AbstractBaseUser, PermissionsMixin):
     company_director = models.CharField(max_length=120, blank=True)
     company_profit_monthly = models.IntegerField(default=0)
 
+    # Optional email (used for bank employees / notifications in prototype)
+    email = models.EmailField(blank=True, default='')
+
+    ROLE_CHOICES = [
+        ('client', 'Client'),
+        ('bank_admin', 'Bank admin'),
+        ('bank_staff', 'Bank staff'),
+    ]
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='client')
+
+    # Link staff/admin accounts to a bank (nullable for normal clients)
+    bank = models.ForeignKey('loans.Bank', null=True, blank=True, on_delete=models.SET_NULL, related_name='bank_users')
+
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
