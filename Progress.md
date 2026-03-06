@@ -174,3 +174,110 @@ GET /api/profile/
 The Profile section was enhanced with a credit history module that displays previously submitted or active loans together with their statuses. If a user has no prior credit activity, the section remains empty, reflecting realistic system behavior rather than displaying placeholder information.
 
 Overall, by the end of Week 006, ClearLoan evolved into a functional MVP demonstrating interaction between frontend interface, backend decision logic, simulated financial data, and user-centered loan navigation. The project now represents a working prototype of a financial navigator adapted to the needs of users in Kyrgyzstan and suitable for live demonstration.
+
+
+Progress of Week 007:
+
+During Week 007, the ClearLoan project underwent a major expansion aimed at transforming the prototype into a more realistic and deployable fintech application. This stage focused on improving database quality, implementing stricter financial filtering logic, expanding user roles, stabilizing backend infrastructure, and deploying the system to a cloud environment so that the mobile application can function outside the local development environment.
+
+One of the primary improvements introduced during this week was the refinement of the **credit decision and filtering system**. Previously, loan requests could be submitted regardless of the user's credit reliability. The system now performs a pre-validation step before allowing a loan request to be sent to banks. If a user has more than three yellow credit warnings (late payments) or at least one red credit violation (a credit that remained unpaid for more than three months), the application automatically blocks the loan request. This ensures that risky applications are filtered out early and prevents bank employees from receiving requests that would realistically never be approved.
+
+In addition to blocking risky requests, the backend logic was extended to **evaluate approval probability**. The system now analyzes user parameters such as monthly income, occupation, requested loan amount, repayment duration, and credit history category. Based on these factors, the backend assigns a simulated decision status such as Approved, Alternative, or Rejected. This mechanism makes the financial recommendation system more realistic and allows the application to simulate real credit evaluation workflows used by financial institutions.
+
+Another major change during this week was the **expansion and restructuring of the database**. The original dataset containing 25 simulated users was significantly improved. Each user profile now contains more detailed financial information, including:
+
+- occupation and employment status
+- monthly income
+- previously issued loans
+- loan repayment records
+- categorized credit events (green, yellow, red)
+- simulated credit risk levels
+
+These improvements make the database far more representative of real banking clients and allow the scoring system to produce more meaningful decisions.
+
+The database now also stores additional financial data for each test user, including:
+
+- type of previously issued loans (consumer loan, mortgage, business loan)
+- original loan amount
+- remaining balance
+- monthly repayment amount
+- repayment behavior history
+- approval or rejection outcomes for previous requests
+
+This expanded dataset enables the system to simulate more complex financial analysis and prepares the backend for future features such as behavioral analytics or financial recommendation models.
+
+Another important addition introduced during this week was the creation of **separate system roles for bank administration and staff members**. The system now supports three main user roles:
+
+- regular client users
+- bank administrators
+- bank staff (loan specialists)
+
+Bank administrators can manage internal bank settings and oversee the credit request flow. Bank staff members represent loan officers who review incoming applications. The filtering system ensures that these staff members receive only valid and potentially approvable loan requests rather than large volumes of rejected applications.
+
+Example login credentials were created for demonstration purposes.
+
+Example client accounts:
+
+Phone: +996700100000  
+Password: demo12345  
+
+Phone: +996700100005  
+Password: demo12345  
+
+Phone: +996700100012  
+Password: demo12345  
+
+Phone: +996700100018  
+Password: demo12345  
+
+Phone: +996700100024  
+Password: demo12345  
+
+Any phone number in the following range can be used for testing:
+
++996700100000 — +996700100024
+
+Example bank administrator account:
+
+Phone: +996555200000  
+Password: demo12345  
+
+Example bank staff account (loan specialist):
+
+Phone: +996556200000  
+Password: demo12345  
+
+These additional roles allow the project to demonstrate how financial institutions manage incoming credit applications internally.
+
+During this development stage, backend API functionality was also carefully reviewed and stabilized. Key endpoints responsible for loan aggregation, bank information retrieval, credit scoring, and application submission were tested to ensure reliable communication between the frontend and backend services. This verification process ensured that the mobile application can consistently interact with the server without breaking the core financial workflow.
+
+A major milestone achieved during Week 007 was the **deployment of the backend infrastructure to a cloud platform**. The Django backend was containerized using Docker and deployed to the Koyeb cloud hosting environment. This allowed the backend to run as a public web service accessible through a secure HTTPS domain. Environment variables were configured to manage security parameters, application settings, and database connections.
+
+To support persistent data storage, the project was integrated with a **Supabase PostgreSQL database**. This replaced the temporary SQLite database previously used during local development. PostgreSQL provides a more reliable and scalable database system capable of supporting real multi-user environments. The connection between Django and Supabase ensures that all users, credit histories, loan applications, and financial records are stored safely in the cloud.
+
+Several infrastructure adjustments were required during the deployment process. Docker configuration was refined, environment variables were configured for production settings, and domain-related security restrictions such as allowed hosts and CSRF trusted origins were corrected to allow secure communication between the deployed backend and the mobile application.
+
+After deployment, the Flutter frontend was configured to communicate directly with the public API endpoint provided by the cloud platform. The application now retrieves bank offers, credit products, and user data from the remote backend instead of relying on a local development server. This change allowed the application to function properly on real mobile devices connected through the internet.
+
+The mobile build pipeline was also finalized during this week. The Flutter project was compiled into both **APK and Android App Bundle (AAB)** formats. The APK build allows the application to be installed directly on Android devices for testing purposes, while the AAB format prepares the project for potential submission to the Google Play Store.
+
+During the mobile build process, additional configuration steps were introduced to ensure stable communication with the backend. Internet permissions were verified in the Android manifest, release builds were configured correctly, and the application was compiled with the production API endpoint so that it can communicate with the deployed backend server.
+
+Several user interface improvements were also made to improve overall usability and visual consistency. Minor adjustments were applied to layout spacing, typography hierarchy, and interactive components to ensure that the interface remains readable and comfortable to use on mobile devices. These adjustments help the application appear more polished and suitable for demonstration purposes.
+
+Summary of key changes introduced during Week 007:
+
+- Improved credit filtering logic preventing risky loan applications from being submitted.
+- Added simulated approval decision system based on user financial characteristics.
+- Expanded database structure with detailed financial attributes and loan histories.
+- Enhanced the dataset of 25 simulated users with richer financial information.
+- Implemented separate roles for clients, bank administrators, and loan specialists.
+- Stabilized and verified backend API endpoints.
+- Containerized the Django backend using Docker.
+- Deployed the backend to the Koyeb cloud platform.
+- Integrated the system with a Supabase PostgreSQL cloud database.
+- Connected the Flutter mobile application to the deployed backend API.
+- Built Android release versions of the application (APK and AAB).
+- Improved user interface elements for a cleaner and more consistent visual presentation.
+
+By the end of Week 007, ClearLoan evolved into a fully functioning fintech prototype with a cloud-hosted backend, a persistent relational database, realistic financial filtering logic, multiple user roles, and a mobile-ready Android application build. The system now closely reflects the architecture and operational flow of modern financial technology platforms.
