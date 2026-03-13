@@ -281,3 +281,56 @@ Summary of key changes introduced during Week 007:
 - Improved user interface elements for a cleaner and more consistent visual presentation.
 
 By the end of Week 007, ClearLoan evolved into a fully functioning fintech prototype with a cloud-hosted backend, a persistent relational database, realistic financial filtering logic, multiple user roles, and a mobile-ready Android application build. The system now closely reflects the architecture and operational flow of modern financial technology platforms.
+
+
+Progress of Week 008
+
+During Week 008, the ClearLoan project focused on implementing the technical tasks defined in the weekly development plan and completing several important functional improvements. The goal of this stage was to transform the prototype into a more realistic fintech demonstration system with improved banking information, user interaction features, backend logic, and a fully deployed cloud infrastructure.
+
+A major milestone of this week was the successful deployment of the application backend to a cloud server. The Django REST Framework backend was containerized and deployed using Docker to the Koyeb cloud platform. This allowed the application to function as a real web service accessible from the internet rather than only running locally. The backend server was connected to a PostgreSQL database hosted on Supabase, which now stores all persistent application data including users, banks, loan products, ratings, notifications, and loan applications.
+
+Another important task completed during this stage was the improvement of the loan aggregation system. Previously, the aggregator displayed loan offers in a static or neutral order. During Week 008, the system was enhanced with a rule-based recommendation mechanism that ranks loan products based on user financial parameters. The recommendation logic now evaluates factors such as income level, loan amount, credit history indicators, and employment status. This allows the aggregator to prioritize banks that have a higher probability of approving the requested loan.
+
+The banking information module was also significantly expanded. Each bank now contains detailed institutional information including headquarters address, contact phone numbers, descriptive background text, and a structured list of loan products offered by the institution. This change allows the application to simulate a realistic financial information platform where users can explore the full range of services provided by each bank.
+
+Special improvements were made to the Islamic credit aggregator. Earlier versions of the system were limited to displaying Islamic financing options from only a single bank. The data model and filtering logic were updated so that loan products can now be marked as Islamic-compliant and dynamically displayed in the aggregator when available. This allows the system to represent a broader set of financial institutions offering Sharia-compliant credit products.
+
+Another feature implemented during this week was the bank rating system. Users can now evaluate banks by assigning a rating from one to five stars and optionally leaving comments about their experience. These ratings are stored in the backend database and aggregated to generate an average score for each institution. This feature introduces a community feedback element similar to the rating systems used in many real financial platforms.
+
+The project also introduced a notification module that allows the backend to generate messages for users regarding important events such as loan application results or system updates. These notifications are stored in the database and retrieved through API endpoints, while the Flutter frontend displays them in a dedicated notifications screen.
+
+Another usability improvement implemented during Week 008 was biometric authentication support. Users can now unlock the application using fingerprint authentication after the initial login process. This simulates the biometric security mechanisms commonly used in modern mobile banking applications and improves both convenience and security.
+
+The user interface also received improvements with the addition of a financial literacy section. This module provides short educational materials explaining fundamental financial topics such as responsible borrowing, interest rates, and credit management. The goal of this section is to simulate the educational features often included in modern banking applications to help users make informed financial decisions.
+
+In addition to these functional improvements, the project architecture was further documented and visualized. A complete system flowchart was created to illustrate the interaction between the Flutter client application, the Django REST backend, the Supabase PostgreSQL database, and the Koyeb deployment infrastructure. This flowchart describes the full data flow within the system including API requests, backend processing logic, and database interactions.
+
+Overall, Week 008 represents the final integration phase of the ClearLoan system. The application now operates as a fully functional fintech prototype with a mobile frontend, cloud-hosted backend, structured database storage, realistic financial workflows, and improved user interaction features.
+
+Tasks Completed in Week 008
+
+The following tasks defined in the technical specification for this week were successfully implemented:
+
+• The loan aggregation system was improved with a rule-based recommendation mechanism that ranks loan offers according to user financial parameters.
+
+• Islamic loan aggregation was expanded to support multiple Islamic-compliant financial products rather than only one bank.
+
+• Detailed bank information was added including headquarters location, support contacts, institutional descriptions, and lists of available loan products.
+
+• A bank rating system was implemented allowing users to evaluate banks from one to five stars.
+
+• A notifications module was developed to allow the backend to generate informational messages for users.
+
+• A financial literacy section was introduced in the application to provide educational materials about loans and financial responsibility.
+
+• The bank comparison interface was redesigned to present loan interest rates and repayment conditions more clearly.
+
+• Biometric authentication (fingerprint login) was added to simulate modern mobile banking security mechanisms.
+
+• The application backend was successfully deployed to the Koyeb cloud platform using Docker.
+
+• A PostgreSQL database hosted on Supabase was integrated for persistent data storage.
+
+• API communication between the Flutter frontend and Django backend was fully configured using HTTP/JSON requests.
+
+• A complete system architecture flowchart was created illustrating the interaction between the Flutter client, Django REST backend, Supabase database, and Koyeb deployment infrastructure.
