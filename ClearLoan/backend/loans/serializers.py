@@ -8,6 +8,8 @@ from .models import (
     BankBranch,
     LoanProduct,
     LoanApplication,
+    AppNotification,
+    BankRating,
 )
 
 class LoanOfferSerializer(serializers.ModelSerializer):
@@ -25,44 +27,25 @@ class LoanRequestSerializer(serializers.ModelSerializer):
         model = LoanRequest
         fields = ['id', 'loan_type', 'amount', 'months', 'purpose', 'created_at']
 
-
 class CreditHistoryEntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditHistoryEntry
         fields = [
-            'id',
-            'provider_name',
-            'original_amount',
-            'opened_at',
-            'closed_at',
-            'status',
-            'late_payments',
-            'note',
-            'created_at',
+            'id','provider_name','original_amount','opened_at','closed_at','status','late_payments','note','created_at',
         ]
-
 
 class BankBranchSerializer(serializers.ModelSerializer):
     class Meta:
         model = BankBranch
         fields = ['id', 'city', 'address_en', 'address_ru', 'address_ky', 'hours']
 
-
 class LoanProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = LoanProduct
         fields = [
-            'id',
-            'loan_type',
-            'title_en', 'title_ru', 'title_ky',
-            'min_amount', 'max_amount',
-            'min_months', 'max_months',
-            'rate_from', 'rate_to',
-            'collateral',
-            'is_islamic',
-            'desc_en', 'desc_ru', 'desc_ky',
+            'id','loan_type','title_en','title_ru','title_ky','min_amount','max_amount','min_months','max_months',
+            'rate_from','rate_to','collateral','is_islamic','desc_en','desc_ru','desc_ky',
         ]
-
 
 class LoanProductWithBankSerializer(serializers.ModelSerializer):
     bank_code = serializers.CharField(source='bank.code', read_only=True)
@@ -73,31 +56,53 @@ class LoanProductWithBankSerializer(serializers.ModelSerializer):
     class Meta:
         model = LoanProduct
         fields = LoanProductSerializer.Meta.fields + [
-            'bank_code',
-            'bank_name_en', 'bank_name_ru', 'bank_name_ky',
+            'bank_code','bank_name_en','bank_name_ru','bank_name_ky',
         ]
 
+class BankRatingSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.full_name', read_only=True)
+
+    class Meta:
+        model = BankRating
+        fields = ['id', 'rating', 'comment', 'created_at', 'user_name', 'user']
+        extra_kwargs = {'user': {'write_only': True}}
 
 class BankSerializer(serializers.ModelSerializer):
+    avg_rating = serializers.SerializerMethodField()
+    rating_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Bank
         fields = [
-            'id', 'code',
-            'name_en', 'name_ru', 'name_ky',
-            'website', 'support_phone',
-            'hq_address_en', 'hq_address_ru', 'hq_address_ky',
-            'about_en', 'about_ru', 'about_ky',
+            'id','code','name_en','name_ru','name_ky','website','support_phone',
+            'hq_address_en','hq_address_ru','hq_address_ky','about_en','about_ru','about_ky',
+            'avg_rating','rating_count',
         ]
 
+    def get_avg_rating(self, obj):
+        vals = list(obj.ratings.all().values_list('rating', flat=True))
+        return round(sum(vals)/len(vals), 2) if vals else 0.0
+
+    def get_rating_count(self, obj):
+        return obj.ratings.count()
 
 class BankDetailSerializer(serializers.ModelSerializer):
     branches = BankBranchSerializer(many=True, read_only=True)
     products = LoanProductSerializer(many=True, read_only=True)
+    ratings = BankRatingSerializer(many=True, read_only=True)
+    avg_rating = serializers.SerializerMethodField()
+    rating_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Bank
-        fields = BankSerializer.Meta.fields + ['branches', 'products']
+        fields = BankSerializer.Meta.fields + ['branches', 'products', 'ratings']
 
+    def get_avg_rating(self, obj):
+        vals = list(obj.ratings.all().values_list('rating', flat=True))
+        return round(sum(vals)/len(vals), 2) if vals else 0.0
+
+    def get_rating_count(self, obj):
+        return obj.ratings.count()
 
 class LoanApplicationSerializer(serializers.ModelSerializer):
     bank_code = serializers.CharField(source='product.bank.code', read_only=True)
@@ -112,17 +117,13 @@ class LoanApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = LoanApplication
         fields = [
-            'id',
-            'amount',
-            'months',
-            'monthly_payment',
-            'decision_status',
-            'approval_probability',
-            'created_at',
-            'bank_code',
-            'bank_name_en', 'bank_name_ru', 'bank_name_ky',
-            'product_title_en', 'product_title_ru', 'product_title_ky',
-            'loan_type',
-            'product',
+            'id','amount','months','monthly_payment','decision_status','approval_probability','created_at',
+            'bank_code','bank_name_en','bank_name_ru','bank_name_ky',
+            'product_title_en','product_title_ru','product_title_ky','loan_type','product',
         ]
         extra_kwargs = {'product': {'write_only': True}}
+
+class AppNotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AppNotification
+        fields = ['id', 'title', 'message', 'category', 'is_read', 'created_at']

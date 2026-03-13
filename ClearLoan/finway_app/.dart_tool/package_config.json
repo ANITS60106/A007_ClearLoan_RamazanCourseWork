@@ -56,6 +56,12 @@
       "languageVersion": "3.8"
     },
     {
+      "name": "flutter_plugin_android_lifecycle",
+      "rootUri": "file:///C:/Users/EVO/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.33",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
       "name": "flutter_web_plugins",
       "rootUri": "file:///C:/src/flutter/packages/flutter_web_plugins",
       "packageUri": "lib/",
@@ -78,6 +84,36 @@
       "rootUri": "file:///C:/Users/EVO/AppData/Local/Pub/Cache/hosted/pub.dev/intl-0.20.2",
       "packageUri": "lib/",
       "languageVersion": "3.3"
+    },
+    {
+      "name": "local_auth",
+      "rootUri": "file:///C:/Users/EVO/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth-2.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "local_auth_android",
+      "rootUri": "file:///C:/Users/EVO/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth_android-1.0.56",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
+      "name": "local_auth_darwin",
+      "rootUri": "file:///C:/Users/EVO/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth_darwin-1.6.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
+      "name": "local_auth_platform_interface",
+      "rootUri": "file:///C:/Users/EVO/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth_platform_interface-1.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "local_auth_windows",
+      "rootUri": "file:///C:/Users/EVO/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth_windows-1.0.11",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
     },
     {
       "name": "material_color_utilities",

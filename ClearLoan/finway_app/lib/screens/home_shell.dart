@@ -3,6 +3,8 @@ import '../services/app_settings.dart';
 import '../services/i18n.dart';
 import 'aggregator_screen.dart';
 import 'loans_screen.dart';
+import 'financial_literacy_screen.dart';
+import 'notifications_screen.dart';
 import 'request_screen.dart';
 import 'profile_screen.dart';
 
@@ -18,7 +20,7 @@ class _HomeShellState extends State<HomeShell> {
 
   final _pages = const [
     AggregatorScreen(),
-    LoansScreen(),
+    FinancialLiteracyScreen(),
     RequestScreen(),
     ProfileScreen(),
   ];
@@ -34,6 +36,11 @@ class _HomeShellState extends State<HomeShell> {
             title: Text(I18n.t('app_name')),
             centerTitle: true,
             actions: [
+              IconButton(
+                tooltip: 'Notifications',
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NotificationsScreen())),
+                icon: const Icon(Icons.notifications_none_rounded),
+              ),
               PopupMenuButton<String>(
                 tooltip: 'Language',
                 onSelected: (v) => AppSettings.setLanguage(v),
@@ -77,8 +84,8 @@ class _HomeShellState extends State<HomeShell> {
                 label: I18n.t('aggregator'),
               ),
               BottomNavigationBarItem(
-                icon: const Icon(Icons.shopping_bag_outlined),
-                label: I18n.t('loans'),
+                icon: const Icon(Icons.menu_book_outlined),
+                label: I18n.t('financial_literacy'),
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.edit_note_rounded),

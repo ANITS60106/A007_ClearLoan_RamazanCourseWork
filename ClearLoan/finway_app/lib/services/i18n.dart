@@ -105,7 +105,10 @@ class I18n {
       'score': 'Score',
       'no_history': 'No credit history yet.',
       'logout': 'Logout',
-    },
+
+      'notifications': 'Notifications',
+      'no_notifications': 'No notifications yet.',
+      'financial_literacy': 'Financial literacy',    },
     'ru': {
       'app_name': 'ClearLoan',
       'welcome_title': 'Добро пожаловать в ClearLoan',
@@ -196,7 +199,10 @@ class I18n {
       'score': 'Скоринг',
       'no_history': 'Кредитной истории пока нет.',
       'logout': 'Выйти',
-    },
+
+      'notifications': 'Уведомления',
+      'no_notifications': 'Уведомлений пока нет.',
+      'financial_literacy': 'Финансовая грамотность',    },
     'ky': {
       'app_name': 'ClearLoan',
       'welcome_title': 'ClearLoanго кош келиңиз',
@@ -287,6 +293,9 @@ class I18n {
       'score': 'Скоринг',
       'no_history': 'Кредит тарыхы жок.',
       'logout': 'Чыгуу',
-    },
+
+      'notifications': 'Билдирмелер',
+      'no_notifications': 'Азырынча билдирмелер жок.',
+      'financial_literacy': 'Финансылык сабаттуулук',    },
   };
 }

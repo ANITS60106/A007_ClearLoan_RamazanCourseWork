@@ -3,635 +3,173 @@ import random
 
 from django.contrib.auth import get_user_model
 
-from .models import Bank, BankBranch, LoanProduct, CreditHistoryEntry, ActiveLoan
+from .models import Bank, BankBranch, LoanProduct, CreditHistoryEntry, ActiveLoan, AppNotification, BankRating
 
 
 def seed_banks_and_products():
-    # NOTE: Data below is used for a prototype demo. Rates/addresses were collected from public pages
-    # on banks' websites at the time of project preparation.
     banks = [
         {
-            "code": "aiyl",
+            "code": "aiyl-bank",
             "name_en": "Aiyl Bank",
             "name_ru": "Айыл Банк",
             "name_ky": "Айыл Банк",
             "website": "https://ab.kg/en/",
             "support_phone": "5511",
-            "hq": {
-                "en": "Bishkek, 14 Logvinenko St., 720040",
-                "ru": "г. Бишкек, ул. Логвиненко, 14, 720040",
-                "ky": "Бишкек, Логвиненко көч., 14, 720040",
-            },
+            "hq": {"en": "Bishkek, 14 Logvinenko St.", "ru": "г. Бишкек, ул. Логвиненко, 14", "ky": "Бишкек, Логвиненко көч., 14"},
             "about": {
-                "en": "State-focused bank with regional infrastructure; supports social and agricultural programs.",
-                "ru": "Банк с сильной региональной сетью; участвует в социальных и агро‑программах.",
-                "ky": "Аймактарда кеңири тармак; социалдык жана агро‑программаларды колдойт.",
+                "en": "Aiyl Bank is a large Kyrgyz bank with strong regional infrastructure, social programs, agricultural finance and Islamic finance products.",
+                "ru": "Айыл Банк — крупный банк Кыргызстана с сильной региональной сетью, социальными программами, агрофинансированием и исламскими продуктами.",
+                "ky": "Айыл Банк — аймактык тармагы күчтүү, социалдык жана агрардык каржылоо, исламдык продуктылары бар ири банк."
             },
-            "branches": [
-                {"city": "Bishkek", "en": "14 Logvinenko St.", "ru": "ул. Логвиненко, 14", "ky": "Логвиненко көч., 14", "hours": "Mon–Fri 08:30–17:30"},
-            ],
+            "branches": [{"city": "Bishkek", "en": "14 Logvinenko St.", "ru": "ул. Логвиненко, 14", "ky": "Логвиненко көч., 14", "hours": "Mon–Fri 08:30–17:30"}],
             "products": [
-                {
-                    "loan_type": "consumer",
-                    "title_en": "Yngailuu (consumer)",
-                    "title_ru": "Ыңгайлуу (потребительский)",
-                    "title_ky": "Ыңгайлуу (керектөөчү)",
-                    "min_amount": 10000,
-                    "max_amount": 500000,
-                    "min_months": 3,
-                    "max_months": 24,
-                    "rate_from": 14.0,
-                    "rate_to": 22.0,
-                    "collateral": "none/guarantor (depends)",
-                    "is_islamic": False,
-                    "desc_en": "Consumer loan products with different terms (prototype).",
-                    "desc_ru": "Потребительские кредиты с разными условиями (прототип).",
-                    "desc_ky": "Ар кандай шарттары бар керектөөчү насыялар (прототип).",
-                },
+                {"loan_type": "consumer", "title_en": "Consumer Loan", "title_ru": "Потребительский кредит", "title_ky": "Керектөөчү насыя", "min_amount": 10000, "max_amount": 500000, "min_months": 3, "max_months": 24, "rate_from": 14.0, "rate_to": 22.0, "collateral": "none", "is_islamic": False, "desc_en": "Consumer loan for everyday needs.", "desc_ru": "Потребительский кредит на бытовые нужды.", "desc_ky": "Күнүмдүк муктаждыктар үчүн насыя."},
+                {"loan_type": "mortgage", "title_en": "Mortgage Loan", "title_ru": "Ипотечный кредит", "title_ky": "Ипотекалык насыя", "min_amount": 300000, "max_amount": 6000000, "min_months": 12, "max_months": 240, "rate_from": 13.0, "rate_to": 18.0, "collateral": "real estate", "is_islamic": False, "desc_en": "Mortgage for housing purchase.", "desc_ru": "Ипотека на покупку жилья.", "desc_ky": "Турак жай алуу үчүн ипотека."},
+                {"loan_type": "business", "title_en": "Islamic Business Financing", "title_ru": "Исламское бизнес-финансирование", "title_ky": "Исламдык бизнес каржылоо", "min_amount": 50000, "max_amount": 1500000, "min_months": 6, "max_months": 60, "rate_from": 12.0, "rate_to": 16.0, "collateral": "guarantor", "is_islamic": True, "desc_en": "Sharia-compliant business financing.", "desc_ru": "Шариат-совместимое бизнес-финансирование.", "desc_ky": "Шариятка ылайык бизнес каржылоо."},
             ],
         },
         {
-            "code": "optima",
+            "code": "optima-bank",
             "name_en": "Optima Bank",
             "name_ru": "Оптима Банк",
             "name_ky": "Оптима Банк",
             "website": "https://optimabank.kg/en/",
             "support_phone": "905959",
-            "hq": {
-                "en": "Bishkek, 493 Jibek-Jolu str., 720070",
-                "ru": "г. Бишкек, ул. Жибек-Жолу, 493, 720070",
-                "ky": "Бишкек, Жибек-Жолу көч., 493, 720070",
-            },
-            "about": {
-                "en": "Retail-focused bank with mobile services and consumer lending.",
-                "ru": "Банк с сильными розничными продуктами и мобильными сервисами.",
-                "ky": "Чекене продуктылар жана мобилдик кызматтар.",
-            },
-            "branches": [
-                {"city": "Bishkek", "en": "493, Jibek-Jolu str.", "ru": "ул. Жибек-Жолу, 493", "ky": "Жибек-Жолу көч., 493", "hours": "Mon–Fri 09:00–18:00"},
-                {"city": "Bishkek", "en": "326, Jibek Jolu ave. (Head office map)", "ru": "пр-т Жибек Жолу, 326", "ky": "Жибек Жолу пр., 326", "hours": ""},
-            ],
+            "hq": {"en": "Bishkek, 493 Jibek-Jolu str.", "ru": "г. Бишкек, ул. Жибек-Жолу, 493", "ky": "Бишкек, Жибек-Жолу көч., 493"},
+            "about": {"en": "Retail-focused bank with strong consumer products, cards and digital services.", "ru": "Розничный банк с сильными потребительскими продуктами, картами и цифровыми сервисами.", "ky": "Керектөөчү продуктылар, карталар жана санарип кызматтары күчтүү банк."},
+            "branches": [{"city": "Bishkek", "en": "493 Jibek-Jolu str.", "ru": "ул. Жибек-Жолу, 493", "ky": "Жибек-Жолу көч., 493", "hours": "Mon–Fri 09:00–18:00"}],
             "products": [
-                {
-                    "loan_type": "consumer",
-                    "title_en": "Consumer loan",
-                    "title_ru": "Потребительский кредит",
-                    "title_ky": "Керектөөчү насыя",
-                    "min_amount": 250001,
-                    "max_amount": 1500000,
-                    "min_months": 3,
-                    "max_months": 60,
-                    "rate_from": 22.0,
-                    "rate_to": 30.0,
-                    "collateral": "depends",
-                    "is_islamic": False,
-                    "desc_en": "Consumer loan in KGS with term up to 60 months (prototype).",
-                    "desc_ru": "Потребкредит в сомах до 60 мес. (прототип).",
-                    "desc_ky": "Сом менен керектөөчү насыя, 60 айга чейин (прототип).",
-                },
-                {
-                    "loan_type": "mortgage",
-                    "title_en": "Mortgage (prototype)",
-                    "title_ru": "Ипотека (прототип)",
-                    "title_ky": "Ипотека (прототип)",
-                    "min_amount": 300000,
-                    "max_amount": 5000000,
-                    "min_months": 12,
-                    "max_months": 120,
-                    "rate_from": 21.0,
-                    "rate_to": 28.0,
-                    "collateral": "real estate",
-                    "is_islamic": False,
-                    "desc_en": "Mortgage product (prototype ranges).",
-                    "desc_ru": "Ипотека (прототип диапазонов).",
-                    "desc_ky": "Ипотека (прототип).",
-                },
+                {"loan_type": "consumer", "title_en": "Fast Consumer Loan", "title_ru": "Быстрый потребительский кредит", "title_ky": "Тез керектөөчү насыя", "min_amount": 15000, "max_amount": 700000, "min_months": 3, "max_months": 48, "rate_from": 19.0, "rate_to": 25.0, "collateral": "none", "is_islamic": False, "desc_en": "Quick consumer financing.", "desc_ru": "Быстрое потребительское финансирование.", "desc_ky": "Тез керектөөчү каржылоо."},
+                {"loan_type": "auto", "title_en": "Auto Loan", "title_ru": "Автокредит", "title_ky": "Автонасыя", "min_amount": 100000, "max_amount": 2500000, "min_months": 12, "max_months": 84, "rate_from": 16.0, "rate_to": 20.0, "collateral": "vehicle", "is_islamic": False, "desc_en": "Loan for vehicle purchase.", "desc_ru": "Кредит на покупку автомобиля.", "desc_ky": "Унаа сатып алуу үчүн насыя."},
             ],
         },
         {
-            "code": "demir",
-            "name_en": "DemirBank",
-            "name_ru": "ДемирБанк",
-            "name_ky": "DemirBank",
+            "code": "demir-bank",
+            "name_en": "Demir Bank",
+            "name_ru": "Демир Банк",
+            "name_ky": "Демир Банк",
             "website": "https://demirbank.kg/en/",
             "support_phone": "+996 (312) 610610",
-            "hq": {
-                "en": "Bishkek, 245 Chui Ave.",
-                "ru": "г. Бишкек, пр. Чүй, 245",
-                "ky": "Бишкек, Чүй пр., 245",
-            },
-            "about": {
-                "en": "Universal bank with retail loans and digital onboarding.",
-                "ru": "Универсальный банк с розничными кредитами и цифровыми сервисами.",
-                "ky": "Универсал банк, чекене насыялар жана санарип кызматтар.",
-            },
-            "branches": [
-                {"city": "Bishkek", "en": "245 Chui Ave.", "ru": "пр. Чүй, 245", "ky": "Чүй пр., 245", "hours": ""},
-            ],
+            "hq": {"en": "Bishkek, 245 Chui Ave.", "ru": "г. Бишкек, пр. Чүй, 245", "ky": "Бишкек, Чүй пр., 245"},
+            "about": {"en": "One of the oldest private banks in Kyrgyzstan with strong retail and SME services.", "ru": "Один из старейших частных банков Кыргызстана с сильными розничными и SME сервисами.", "ky": "Кыргызстандагы эң эски жеке банктардын бири, чекене жана SME кызматтары күчтүү."},
+            "branches": [{"city": "Bishkek", "en": "245 Chui Ave.", "ru": "пр. Чүй, 245", "ky": "Чүй пр., 245", "hours": "Mon–Fri 09:00–17:00"}],
             "products": [
-                {
-                    "loan_type": "consumer",
-                    "title_en": "Loan for any purpose (prototype)",
-                    "title_ru": "Кредит на любые цели (прототип)",
-                    "title_ky": "Каалаган максатка насыя (прототип)",
-                    "min_amount": 10000,
-                    "max_amount": 700000,
-                    "min_months": 6,
-                    "max_months": 60,
-                    "rate_from": 20.0,
-                    "rate_to": 30.0,
-                    "collateral": "depends",
-                    "is_islamic": False,
-                    "desc_en": "Consumer loan product (prototype).",
-                    "desc_ru": "Потребительский кредит (прототип).",
-                    "desc_ky": "Керектөөчү насыя (прототип).",
-                },
+                {"loan_type": "consumer", "title_en": "Personal Loan", "title_ru": "Персональный кредит", "title_ky": "Жеке насыя", "min_amount": 20000, "max_amount": 600000, "min_months": 6, "max_months": 60, "rate_from": 18.0, "rate_to": 23.0, "collateral": "none", "is_islamic": False, "desc_en": "Personal loan for various needs.", "desc_ru": "Персональный кредит на разные нужды.", "desc_ky": "Ар кандай муктаждыктар үчүн жеке насыя."},
+                {"loan_type": "business", "title_en": "Islamic Financing", "title_ru": "Исламское финансирование", "title_ky": "Исламдык каржылоо", "min_amount": 50000, "max_amount": 1200000, "min_months": 6, "max_months": 60, "rate_from": 13.0, "rate_to": 17.0, "collateral": "guarantor", "is_islamic": True, "desc_en": "Islamic finance product compliant with Sharia principles.", "desc_ru": "Исламский финансовый продукт по принципам шариата.", "desc_ky": "Шарият принциптерине ылайык исламдык каржы продукты."},
             ],
         },
         {
-            "code": "kicb",
-            "name_en": "KICB",
-            "name_ru": "КИКБ",
-            "name_ky": "KICB",
-            "website": "https://kicb.net/en/",
-            "support_phone": "",
-            "hq": {
-                "en": "Bishkek, 21 Erkindik Ave.",
-                "ru": "г. Бишкек, пр. Эркиндик, 21",
-                "ky": "Бишкек, Эркиндик пр., 21",
-            },
-            "about": {
-                "en": "Kyrgyz Investment and Credit Bank with retail and SME products.",
-                "ru": "Кыргызский Инвестиционно‑Кредитный Банк: продукты для физлиц и бизнеса.",
-                "ky": "Инвестиция жана кредит банкы: жеке жана бизнес продуктылар.",
-            },
-            "branches": [
-                {"city": "Bishkek", "en": "21 Erkindik Ave.", "ru": "пр. Эркиндик, 21", "ky": "Эркиндик пр., 21", "hours": "Mon–Fri 09:00–17:00"},
-            ],
-            "products": [
-                {
-                    "loan_type": "consumer",
-                    "title_en": "Personal (consumer) loan",
-                    "title_ru": "Потребительский кредит Personal",
-                    "title_ky": "Personal керектөөчү насыя",
-                    "min_amount": 1000000,
-                    "max_amount": 36000000,
-                    "min_months": 6,
-                    "max_months": 120,
-                    "rate_from": 19.0,
-                    "rate_to": 25.0,
-                    "collateral": "depends",
-                    "is_islamic": False,
-                    "desc_en": "Consumer loans with rate from 19% (prototype).",
-                    "desc_ru": "Потребкредиты со ставкой от 19% (прототип).",
-                    "desc_ky": "19% дан башталган керектөөчү насыя (прототип).",
-                },
-            ],
-        },
-        {
-            "code": "kompanion",
-            "name_en": "Kompanion Bank",
-            "name_ru": "Банк Компаньон",
-            "name_ky": "Компаньон Банк",
-            "website": "https://www.kompanion.kg/en/",
-            "support_phone": "",
-            "hq": {
-                "en": "Bishkek, 62 Shota Rustaveli St., 720044",
-                "ru": "г. Бишкек, ул. Шота Руставели, 62, 720044",
-                "ky": "Бишкек, Шота Руставели көч., 62, 720044",
-            },
-            "about": {
-                "en": "Retail and SME lender with consumer products (prototype).",
-                "ru": "Кредитование физлиц и МСБ, потребительские продукты (прототип).",
-                "ky": "Жеке жана МСБ насыялары (прототип).",
-            },
-            "branches": [
-                {"city": "Bishkek", "en": "62 Shota Rustaveli St.", "ru": "ул. Шота Руставели, 62", "ky": "Шота Руставели көч., 62", "hours": ""},
-                {"city": "Bishkek", "en": "248A, Kievskaya St.", "ru": "ул. Киевская, 248А", "ky": "Киевская көч., 248А", "hours": ""},
-            ],
-            "products": [
-                {
-                    "loan_type": "consumer",
-                    "title_en": "Consumer Loan",
-                    "title_ru": "Потребительский кредит",
-                    "title_ky": "Керектөөчү насыя",
-                    "min_amount": 10000,
-                    "max_amount": 500000,
-                    "min_months": 3,
-                    "max_months": 48,
-                    "rate_from": 22.0,
-                    "rate_to": 26.99,
-                    "collateral": "depends",
-                    "is_islamic": False,
-                    "desc_en": "Nominal annual interest rate from 22% (prototype).",
-                    "desc_ru": "Номинальная ставка от 22% (прототип).",
-                    "desc_ky": "Номиналдык чен 22% дан (прототип).",
-                },
-            ],
-        },
-        {
-            "code": "baitushum",
-            "name_en": "Bai-Tushum Bank",
-            "name_ru": "Бай-Тушум Банк",
-            "name_ky": "Бай-Тушум Банк",
-            "website": "https://www.baitushum.kg/en/",
-            "support_phone": "+996 (312) 905 805",
-            "hq": {
-                "en": "Bishkek, 76 Umetaliev St.",
-                "ru": "г. Бишкек, ул. Уметалиева, 76",
-                "ky": "Бишкек, Уметалиев көч., 76",
-            },
-            "about": {
-                "en": "Bank with consumer and SME lending, wide branch network (prototype).",
-                "ru": "Банк с потребительским и бизнес‑кредитованием (прототип).",
-                "ky": "Керектөөчү жана бизнес насыялары (прототип).",
-            },
-            "branches": [
-                {"city": "Bishkek", "en": "76 Umetaliev St.", "ru": "ул. Уметалиева, 76", "ky": "Уметалиев көч., 76", "hours": ""},
-                {"city": "Bishkek", "en": "119 Abdrakhmanova St.", "ru": "ул. Абдрахманова, 119", "ky": "Абдрахманова көч., 119", "hours": ""},
-            ],
-            "products": [
-                {
-                    "loan_type": "consumer",
-                    "title_en": "Consumer loans",
-                    "title_ru": "Потребительские кредиты",
-                    "title_ky": "Керектөөчү насыялар",
-                    "min_amount": 10000,
-                    "max_amount": 300000,
-                    "min_months": 3,
-                    "max_months": 24,
-                    "rate_from": 30.58,
-                    "rate_to": 35.0,
-                    "collateral": "depends",
-                    "is_islamic": False,
-                    "desc_en": "Consumer loans; rate depends on solvency/collateral (prototype).",
-                    "desc_ru": "Ставка зависит от условий/обеспечения (прототип).",
-                    "desc_ky": "Чен камсыздоо/шарттарга жараша (прототип).",
-                },
-            ],
-        },
-        {
-            "code": "eldik",
+            "code": "eldik-bank",
             "name_en": "Eldik Bank",
             "name_ru": "Элдик Банк",
             "name_ky": "Элдик Банк",
             "website": "https://eldik.kg/en",
             "support_phone": "9111",
-            "hq": {
-                "en": "Bishkek, 80/1 Moskovskaya St.",
-                "ru": "г. Бишкек, ул. Московская, 80/1",
-                "ky": "Бишкек, Московская көч., 80/1",
-            },
-            "about": {
-                "en": "State bank, consumer and car loans (prototype).",
-                "ru": "Госбанк: потребительские и авто‑кредиты (прототип).",
-                "ky": "Мамбанк: керектөөчү жана авто насыялар (прототип).",
-            },
-            "branches": [
-                {"city": "Bishkek", "en": "80/1 Moskovskaya St.", "ru": "ул. Московская, 80/1", "ky": "Московская көч., 80/1", "hours": "24/7 contact center"},
-            ],
+            "hq": {"en": "Bishkek, 80/1 Moskovskaya St.", "ru": "г. Бишкек, ул. Московская, 80/1", "ky": "Бишкек, Московская көч., 80/1"},
+            "about": {"en": "Large state bank with universal retail loan products.", "ru": "Крупный государственный банк с универсальными кредитными продуктами.", "ky": "Универсал насыя продуктылары бар ири мамлекеттик банк."},
+            "branches": [{"city": "Bishkek", "en": "80/1 Moskovskaya St.", "ru": "ул. Московская, 80/1", "ky": "Московская көч., 80/1", "hours": "Mon–Fri 09:00–18:00"}],
             "products": [
-                {
-                    "loan_type": "consumer",
-                    "title_en": "Consumer credit",
-                    "title_ru": "Потребительский кредит",
-                    "title_ky": "Керектөөчү насыя",
-                    "min_amount": 10000,
-                    "max_amount": 4000000,
-                    "min_months": 3,
-                    "max_months": 60,
-                    "rate_from": 19.0,
-                    "rate_to": 30.0,
-                    "collateral": "depends",
-                    "is_islamic": False,
-                    "desc_en": "Consumer credit from 19% per annum (prototype).",
-                    "desc_ru": "Потребкредит от 19% годовых (прототип).",
-                    "desc_ky": "19% дан башталган керектөөчү насыя (прототип).",
-                },
-            ],
-        },
-        {
-            "code": "bakai",
-            "name_en": "Bakai Bank",
-            "name_ru": "Бакай Банк",
-            "name_ky": "Бакай Банк",
-            "website": "https://bakai.kg/en/",
-            "support_phone": "",
-            "hq": {
-                "en": "Bishkek, 56 Michurina St.",
-                "ru": "г. Бишкек, ул. Мичурина, 56",
-                "ky": "Бишкек, Мичурина көч., 56",
-            },
-            "about": {
-                "en": "Retail bank with online loan products (prototype).",
-                "ru": "Розничный банк, в том числе онлайн‑кредиты (прототип).",
-                "ky": "Чекене банк, онлайн насыялар (прототип).",
-            },
-            "branches": [
-                {"city": "Bishkek", "en": "56 Michurina St.", "ru": "ул. Мичурина, 56", "ky": "Мичурина көч., 56", "hours": ""},
-            ],
-            "products": [
-                {
-                    "loan_type": "consumer",
-                    "title_en": "Online loan up to 200,000 KGS",
-                    "title_ru": "Онлайн кредит до 200 000 сом",
-                    "title_ky": "200 000 сомго чейин онлайн насыя",
-                    "min_amount": 10000,
-                    "max_amount": 200000,
-                    "min_months": 3,
-                    "max_months": 36,
-                    "rate_from": 15.5,
-                    "rate_to": 30.0,
-                    "collateral": "none",
-                    "is_islamic": False,
-                    "desc_en": "Online loan product (prototype).",
-                    "desc_ru": "Онлайн кредит (прототип).",
-                    "desc_ky": "Онлайн насыя (прототип).",
-                },
+                {"loan_type": "consumer", "title_en": "Consumer Credit", "title_ru": "Потребительский кредит", "title_ky": "Керектөөчү насыя", "min_amount": 10000, "max_amount": 4000000, "min_months": 3, "max_months": 60, "rate_from": 19.0, "rate_to": 30.0, "collateral": "depends", "is_islamic": False, "desc_en": "Consumer credit for different needs.", "desc_ru": "Потребительский кредит для разных нужд.", "desc_ky": "Ар кандай муктаждык үчүн керектөөчү насыя."},
+                {"loan_type": "business", "title_en": "Islamic SME Financing", "title_ru": "Исламское финансирование МСБ", "title_ky": "Исламдык ЧОБ каржылоо", "min_amount": 100000, "max_amount": 2000000, "min_months": 6, "max_months": 60, "rate_from": 14.0, "rate_to": 18.0, "collateral": "guarantor", "is_islamic": True, "desc_en": "Islamic financing for SME growth.", "desc_ru": "Исламское финансирование для развития МСБ.", "desc_ky": "ЧОБ өнүктүрүү үчүн исламдык каржылоо."},
             ],
         },
     ]
 
     for b in banks:
-        domain = f"{b['code']}.kg"
-        notify_email = f"credit.applications@{domain}"
-        bank, _ = Bank.objects.get_or_create(
-            code=b["code"],
+        bank, _ = Bank.objects.update_or_create(
+            code=b['code'],
             defaults=dict(
-                name_en=b["name_en"],
-                name_ru=b["name_ru"],
-                name_ky=b["name_ky"],
-                website=b["website"],
-                support_phone=b["support_phone"],
-                hq_address_en=b["hq"]["en"],
-                hq_address_ru=b["hq"]["ru"],
-                hq_address_ky=b["hq"]["ky"],
-                about_en=b["about"]["en"],
-                about_ru=b["about"]["ru"],
-                about_ky=b["about"]["ky"],
-                email_domain=domain,
-                notification_email=notify_email,
-            ),
-        )
-        # update if exists (simple)
-        Bank.objects.filter(id=bank.id).update(
-            name_en=b["name_en"],
-            name_ru=b["name_ru"],
-            name_ky=b["name_ky"],
-            website=b["website"],
-            support_phone=b["support_phone"],
-            hq_address_en=b["hq"]["en"],
-            hq_address_ru=b["hq"]["ru"],
-            hq_address_ky=b["hq"]["ky"],
-            about_en=b["about"]["en"],
-            about_ru=b["about"]["ru"],
-            about_ky=b["about"]["ky"],
-            email_domain=domain,
-            notification_email=notify_email,
-        )
-
-        # branches
-        for br in b.get("branches", []):
-            BankBranch.objects.get_or_create(
-                bank=bank,
-                city=br.get("city", ""),
-                address_en=br["en"],
-                address_ru=br["ru"],
-                address_ky=br["ky"],
-                defaults={"hours": br.get("hours", "")},
+                name_en=b['name_en'], name_ru=b['name_ru'], name_ky=b['name_ky'],
+                website=b['website'], support_phone=b['support_phone'],
+                hq_address_en=b['hq']['en'], hq_address_ru=b['hq']['ru'], hq_address_ky=b['hq']['ky'],
+                about_en=b['about']['en'], about_ru=b['about']['ru'], about_ky=b['about']['ky'],
+                email_domain=f"{b['code']}.kg", notification_email=f"credit.applications@{b['code']}.kg",
             )
-
-        # products
-        for p in b.get("products", []):
-            LoanProduct.objects.get_or_create(
-                bank=bank,
-                loan_type=p["loan_type"],
-                title_en=p["title_en"],
-                defaults=dict(
-                    title_ru=p["title_ru"],
-                    title_ky=p["title_ky"],
-                    min_amount=p["min_amount"],
-                    max_amount=p["max_amount"],
-                    min_months=p["min_months"],
-                    max_months=p["max_months"],
-                    rate_from=p["rate_from"],
-                    rate_to=p["rate_to"],
-                    collateral=p.get("collateral", ""),
-                    is_islamic=p.get("is_islamic", False),
-                    desc_en=p.get("desc_en", ""),
-                    desc_ru=p.get("desc_ru", ""),
-                    desc_ky=p.get("desc_ky", ""),
-                ),
-            )
+        )
+        BankBranch.objects.filter(bank=bank).delete()
+        LoanProduct.objects.filter(bank=bank).delete()
+        for br in b['branches']:
+            BankBranch.objects.create(bank=bank, city=br['city'], address_en=br['en'], address_ru=br['ru'], address_ky=br['ky'], hours=br['hours'])
+        for p in b['products']:
+            LoanProduct.objects.create(bank=bank, **p)
 
 
 def seed_fake_users_with_histories(count: int = 25):
     User = get_user_model()
-
-    first_names = [
-        ("Aibek", "Айбек", "Айбек"),
-        ("Ainura", "Айнура", "Айнура"),
-        ("Ramazan", "Рамазан", "Рамазан"),
-        ("Bakyt", "Бакыт", "Бакыт"),
-        ("Meerim", "Мээрим", "Мээрим"),
-        ("Nursultan", "Нурсултан", "Нурсултан"),
-        ("Aigerim", "Айгерим", "Айгерим"),
-        ("Erbol", "Эрбол", "Эрбол"),
-        ("Kanykei", "Каныкей", "Каныкей"),
-        ("Adilet", "Адилет", "Адилет"),
-    ]
-    last_names = [
-        ("Ulanbekov", "Уланбеков", "Уланбеков"),
-        ("Sydykov", "Сыдыков", "Сыдыков"),
-        ("Turgunbaev", "Тургунбаев", "Тургунбаев"),
-        ("Ismailova", "Исмаилова", "Исмаилова"),
-        ("Abdyrahmanov", "Абдырахманов", "Абдырахманов"),
-        ("Japarov", "Жапаров", "Жапаров"),
-        ("Toktogulova", "Токтогулова", "Токтогулова"),
-    ]
-    occupations = [
-        "Student",
-        "Teacher",
-        "Driver",
-        "Software Developer",
-        "Sales Manager",
-        "Doctor",
-        "Accountant",
-        "Self-employed",
-        "Farmer",
-        "Office Worker",
-        "Courier",
-        "Nurse",
-        "Construction Worker",
-    ]
-
-    # Create users with different credit histories
+    providers = ["Aiyl Bank", "Optima Bank", "Demir Bank", "Eldik Bank"]
+    occupations = ["Student", "Teacher", "Driver", "Software Developer", "Sales Manager", "Doctor", "Accountant", "Self-employed", "Farmer", "Office Worker"]
+    names = ["Aibek", "Ainura", "Ramazan", "Bakyt", "Meerim", "Nursultan", "Aigerim", "Erbol", "Kanykei", "Adilet"]
     for i in range(count):
         phone = f"+996700{100000 + i}"
-        password = "demo12345"
-        fn = random.choice(first_names)[1]
-        ln = random.choice(last_names)[1]
-        full_name = f"{ln} {fn}"
-        passport_id = f"AN{random.randint(1000000,9999999)}"
-        occupation = random.choice(occupations)
-        income = random.choice([18000, 25000, 32000, 45000, 60000, 80000, 120000, 180000])
-        user_type = "individual"
-
         user, created = User.objects.get_or_create(
             phone=phone,
             defaults=dict(
-                full_name=full_name,
-                passport_id=passport_id,
+                full_name=f"{random.choice(names)} Demo {i+1}",
+                passport_id=f"AN{1000000+i}",
                 workplace="Demo workplace",
-                occupation=occupation,
-                monthly_income=income,
-                user_type=user_type,
-            ),
+                occupation=random.choice(occupations),
+                monthly_income=random.choice([18000, 25000, 32000, 45000, 60000, 80000, 120000]),
+                user_type='individual',
+                role='client',
+            )
         )
         if created:
-            user.set_password(password)
+            user.set_password('demo12345')
             user.save()
-
-        # Clear and regenerate demo financial data for idempotence-ish
         CreditHistoryEntry.objects.filter(user=user).delete()
         ActiveLoan.objects.filter(user=user).delete()
+        AppNotification.objects.filter(user=user).delete()
 
-        # More deterministic distribution so demo includes all scenarios:
-        #  - first 7: clean
-        #  - next 6: late (yellow)
-        #  - next 6: mixed
-        #  - next 3: default (red)
-        #  - remaining: none
-        if i < 7:
-            mode = "clean"
-        elif i < 13:
-            mode = "late"
-        elif i < 19:
-            mode = "mixed"
-        elif i < 22:
-            mode = "default"
-        else:
-            mode = "none"
-        providers = ["Aiyl Bank", "Optima Bank", "KICB", "Bakai Bank", "Kompanion Bank", "Bai-Tushum Bank", "Eldik Bank"]
-
-        if mode == "none":
-            # Some users with no history but may have an active loan in the app basket
-            if random.random() < 0.4:
-                ActiveLoan.objects.create(
-                    user=user,
-                    provider_name=random.choice(providers),
-                    amount=random.choice([30000, 60000, 120000]),
-                    months=random.choice([6, 12, 18]),
-                    rate=random.choice([18.0, 22.0, 26.0]),
-                    monthly_payment=random.choice([6000, 9000, 12000]),
-                    status='active',
-                )
+        mode = 'clean' if i < 7 else 'late' if i < 13 else 'mixed' if i < 19 else 'default' if i < 22 else 'none'
+        if mode == 'none':
+            AppNotification.objects.create(user=user, title='Welcome to ClearLoan', message='Your profile has no credit history yet. You can still request loans.', category='info')
             continue
-
-        entries_n = random.randint(2, 5) if mode != "default" else random.randint(1, 2)
-        for _ in range(entries_n):
-            provider = random.choice(providers)
-            original_amount = random.choice([50000, 100000, 200000, 300000, 500000])
-            opened = date.today() - timedelta(days=random.randint(200, 2000))
-            closed = None
-            status = "ontime"
+        for idx in range(random.randint(2, 4) if mode != 'default' else random.randint(1, 2)):
+            status = 'ontime'
             late_payments = 0
-            note = ""
-
-            if mode == "clean":
-                status = "ontime"
-                late_payments = 0
-            elif mode == "late":
-                status = "late"
-                # Yellow zone: multiple small delays
-                late_payments = random.randint(1, 5)
-                note = "Had payment delays (yellow zone)."
-            elif mode == "mixed":
-                status = random.choice(["ontime", "late"])
-                late_payments = 0 if status == "ontime" else random.randint(1, 4)
-            elif mode == "default":
-                status = "default"
-                # Red zone: serious delinquency (3+ months unpaid)
-                late_payments = random.randint(8, 14)
-                note = "Unpaid for 3+ months (red zone)."
-
-            if status in ["ontime", "late"] and random.random() < 0.5:
-                closed = opened + timedelta(days=random.randint(120, 720))
-
+            note = ''
+            if mode == 'late':
+                status = 'late'; late_payments = random.randint(1, 2); note = 'Yellow zone delay.'
+            elif mode == 'mixed':
+                status = random.choice(['ontime','late']); late_payments = 0 if status=='ontime' else random.randint(1,3)
+            elif mode == 'default':
+                status = 'default'; late_payments = random.randint(8, 14); note = 'Red zone default.'
             CreditHistoryEntry.objects.create(
-                user=user,
-                provider_name=provider,
-                original_amount=original_amount,
-                opened_at=opened,
-                closed_at=closed,
-                status=status,
-                late_payments=late_payments,
-                note=note,
+                user=user, provider_name=random.choice(providers), original_amount=random.choice([50000,100000,200000,300000,500000]),
+                opened_at=date.today()-timedelta(days=random.randint(200,1800)), closed_at=None if status=='default' else date.today()-timedelta(days=random.randint(10,180)),
+                status=status, late_payments=late_payments, note=note,
             )
+        if mode in ['clean','late','mixed'] and random.random() < 0.7:
+            amt = random.choice([40000,80000,150000,250000,400000])
+            m = random.choice([6,12,18,24,36])
+            r = random.choice([18.0,22.0,26.0])
+            ActiveLoan.objects.create(user=user, provider_name=random.choice(providers), amount=amt, months=m, rate=r, monthly_payment=int((amt*(1+r/100))/m), status='active')
+        AppNotification.objects.create(user=user, title='Profile prepared', message=f'Demo user created with {mode} credit profile.', category='info')
 
 
 def seed_bank_admins_and_staff():
-    """Create prototype bank admin + staff accounts for demo."""
     User = get_user_model()
     banks = list(Bank.objects.all().order_by('code'))
-    base_phone = 200000
-
+    base = 200000
     for idx, bank in enumerate(banks):
-        # Admin
-        admin_phone = f"+996555{base_phone + idx:06d}"
-        admin_email = f"admin@{bank.email_domain or (bank.code + '.kg')}"
+        admin_phone = f"+996555{base + idx:06d}"
         admin, created = User.objects.get_or_create(
             phone=admin_phone,
-            defaults=dict(
-                full_name=f"{bank.name_ru} Admin",
-                workplace=bank.name_en,
-                occupation='Bank administrator',
-                monthly_income=200000,
-                user_type='legal',
-                role='bank_admin',
-                bank=bank,
-                email=admin_email,
-                is_staff=True,
-            ),
+            defaults=dict(full_name=f"{bank.name_en} Admin", workplace=bank.name_en, occupation='Bank administrator', monthly_income=200000, user_type='legal', role='bank_admin', bank=bank, email=f"admin@{bank.email_domain}", is_staff=True)
         )
         if created:
-            admin.set_password('demo12345')
-            admin.save()
-
-        # Staff (credit specialist)
-        staff_phone = f"+996556{base_phone + idx:06d}"
-        staff_email = f"credit.specialist@{bank.email_domain or (bank.code + '.kg')}"
+            admin.set_password('demo12345'); admin.save()
+        staff_phone = f"+996556{base + idx:06d}"
         staff, created = User.objects.get_or_create(
             phone=staff_phone,
-            defaults=dict(
-                full_name=f"{bank.name_ru} Specialist",
-                workplace=bank.name_en,
-                occupation='Credit specialist',
-                monthly_income=150000,
-                user_type='legal',
-                role='bank_staff',
-                bank=bank,
-                email=staff_email,
-                is_staff=True,
-            ),
+            defaults=dict(full_name=f"{bank.name_en} Specialist", workplace=bank.name_en, occupation='Credit specialist', monthly_income=150000, user_type='legal', role='bank_staff', bank=bank, email=f"credit.specialist@{bank.email_domain}", is_staff=True)
         )
         if created:
-            staff.set_password('demo12345')
-            staff.save()
-
-        # Add a couple of active loans for realism (some users already pay monthly)
-        if random.random() < 0.55 and mode in ["clean", "late", "mixed"]:
-            active_n = 1 if random.random() < 0.75 else 2
-            for _ in range(active_n):
-                amt = random.choice([40000, 80000, 150000, 250000, 400000])
-                m = random.choice([6, 12, 18, 24, 36])
-                r = random.choice([18.0, 22.0, 26.0, 30.0])
-                ActiveLoan.objects.create(
-                    user=user,
-                    provider_name=random.choice(providers),
-                    amount=amt,
-                    months=m,
-                    rate=r,
-                    monthly_payment=int((amt * (1 + r / 100)) / m),
-                    status='active' if random.random() < 0.85 else 'completed',
-                )
+            staff.set_password('demo12345'); staff.save()
+        AppNotification.objects.get_or_create(user=admin, title='Admin account ready', defaults={'message': f'Bank admin account linked to {bank.name_en}.', 'category': 'info'})
+        AppNotification.objects.get_or_create(user=staff, title='Inbox ready', defaults={'message': f'Loan specialist account linked to {bank.name_en}.', 'category': 'info'})
+        # starter ratings
+        for score in [4,5,5]:
+            rater = User.objects.filter(role='client').order_by('?').first()
+            if rater:
+                BankRating.objects.get_or_create(bank=bank, user=rater, defaults={'rating': score, 'comment': 'Good service'})

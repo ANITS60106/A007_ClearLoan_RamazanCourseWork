@@ -147,3 +147,27 @@ class LoanApplication(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+
+class AppNotification(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=180)
+    message = models.TextField(blank=True)
+    category = models.CharField(max_length=40, default='info')
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+
+class BankRating(models.Model):
+    bank = models.ForeignKey(Bank, on_delete=models.CASCADE, related_name='ratings')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='bank_ratings')
+    rating = models.PositiveSmallIntegerField(default=5)
+    comment = models.CharField(max_length=220, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('bank', 'user')
+        ordering = ['-created_at']

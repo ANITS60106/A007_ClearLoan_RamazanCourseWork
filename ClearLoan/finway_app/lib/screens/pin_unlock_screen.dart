@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
 import '../services/pin_service.dart';
 import '../services/i18n.dart';
 import 'home_shell.dart';
@@ -12,6 +13,7 @@ class PinUnlockScreen extends StatefulWidget {
 
 class _PinUnlockScreenState extends State<PinUnlockScreen> {
   final _pin = TextEditingController();
+  final LocalAuthentication _auth = LocalAuthentication();
   bool _wrong = false;
   bool _loading = false;
 
@@ -37,6 +39,16 @@ class _PinUnlockScreenState extends State<PinUnlockScreen> {
         _loading = false;
       });
     }
+  }
+
+  Future<void> _fingerprint() async {
+    try {
+      final ok = await _auth.authenticate(localizedReason: 'Use fingerprint to unlock ClearLoan');
+      if (!mounted) return;
+      if (ok) {
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeShell()));
+      }
+    } catch (_) {}
   }
 
   @override
@@ -71,6 +83,8 @@ class _PinUnlockScreenState extends State<PinUnlockScreen> {
                   errorText: _wrong ? I18n.t('pin_wrong') : null,
                 ),
               ),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(onPressed: _fingerprint, icon: const Icon(Icons.fingerprint), label: const Text('Use fingerprint')),
               const Spacer(),
               ElevatedButton(
                 onPressed: _submit,

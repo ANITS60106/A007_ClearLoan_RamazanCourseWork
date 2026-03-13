@@ -16,6 +16,8 @@ from .models import (
     BankBranch,
     LoanProduct,
     LoanApplication,
+    AppNotification,
+    BankRating,
 )
 from .serializers import (
     LoanOfferSerializer,
@@ -26,6 +28,8 @@ from .serializers import (
     BankDetailSerializer,
     LoanProductWithBankSerializer,
     LoanApplicationSerializer,
+    AppNotificationSerializer,
+    BankRatingSerializer,
 )
 
 
@@ -466,3 +470,35 @@ class SeedDemoDataView(APIView):
         from .seed import seed_banks_and_products
         seed_banks_and_products()
         return Response({'detail': 'seeded'})
+
+
+class AppNotificationListView(generics.ListAPIView):
+    serializer_class = AppNotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return AppNotification.objects.filter(user=self.request.user)
+
+
+class MarkNotificationReadView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        n = AppNotification.objects.get(id=pk, user=request.user)
+        n.is_read = True
+        n.save(update_fields=['is_read'])
+        return Response({'detail': 'ok'})
+
+
+class BankRateView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, code):
+        bank = Bank.objects.get(code=code)
+        rating = int(request.data.get('rating', 5))
+        comment = (request.data.get('comment') or '').strip()
+        rating = max(1, min(5, rating))
+        obj, _ = BankRating.objects.update_or_create(
+            bank=bank, user=request.user, defaults={'rating': rating, 'comment': comment}
+        )
+        return Response(BankRatingSerializer(obj).data)

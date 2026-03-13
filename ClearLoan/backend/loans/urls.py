@@ -13,12 +13,16 @@ from .views import (
     CreditHistoryView,
     CreditHistorySummaryView,
     SeedDemoDataView,
+    AppNotificationListView,
+    MarkNotificationReadView,
+    BankRateView,
 )
 
 urlpatterns = [
     path('offers/', OffersListView.as_view()),
     path('banks/', BanksListView.as_view()),
     path('banks/<slug:code>/', BankDetailView.as_view()),
+    path('banks/<slug:code>/rate/', BankRateView.as_view()),
     path('products/', LoanProductsListView.as_view()),
     path('options/scored/', ScoredBankOptionsView.as_view()),
     path('applications/', LoanApplicationsView.as_view()),
@@ -28,5 +32,7 @@ urlpatterns = [
     path('requests/', LoanRequestsView.as_view()),
     path('credit-history/', CreditHistoryView.as_view()),
     path('credit-history/summary/', CreditHistorySummaryView.as_view()),
+    path('notifications/', AppNotificationListView.as_view()),
+    path('notifications/<int:pk>/read/', MarkNotificationReadView.as_view()),
     path('seed/', SeedDemoDataView.as_view()),
 ]

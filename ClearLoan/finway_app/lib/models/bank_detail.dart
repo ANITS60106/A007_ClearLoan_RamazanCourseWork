@@ -81,16 +81,30 @@ class LoanProduct {
       );
 }
 
+class BankRating {
+  final int rating;
+  final String comment;
+  final String userName;
+  const BankRating({required this.rating, required this.comment, required this.userName});
+  static BankRating fromJson(Map<String, dynamic> j) => BankRating(rating: (j['rating'] ?? 0) as int, comment: (j['comment'] ?? '') as String, userName: (j['user_name'] ?? '') as String);
+}
+
 class BankDetail {
   final Bank bank;
   final List<BankBranch> branches;
   final List<LoanProduct> products;
+  final List<BankRating> ratings;
+  final double avgRating;
+  final int ratingCount;
 
-  const BankDetail({required this.bank, required this.branches, required this.products});
+  const BankDetail({required this.bank, required this.branches, required this.products, required this.ratings, required this.avgRating, required this.ratingCount});
 
   static BankDetail fromJson(Map<String, dynamic> j) => BankDetail(
         bank: Bank.fromJson(j),
         branches: ((j['branches'] ?? []) as List).map((e) => BankBranch.fromJson(e)).toList(),
         products: ((j['products'] ?? []) as List).map((e) => LoanProduct.fromJson(e)).toList(),
+        ratings: ((j['ratings'] ?? []) as List).map((e) => BankRating.fromJson(e)).toList(),
+        avgRating: ((j['avg_rating'] ?? 0) as num).toDouble(),
+        ratingCount: (j['rating_count'] ?? 0) as int,
       );
 }
